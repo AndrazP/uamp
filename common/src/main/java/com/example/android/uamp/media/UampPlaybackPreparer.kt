@@ -56,7 +56,7 @@ class UampPlaybackPreparer(
                     PlaybackStateCompat.ACTION_PREPARE_FROM_SEARCH or
                     PlaybackStateCompat.ACTION_PLAY_FROM_SEARCH
 
-    override fun onPrepare() = Unit
+    override fun onPrepare(playWhenReady: Boolean) = Unit
 
     /**
      * Handles callbacks to both [MediaSessionCompat.Callback.onPrepareFromMediaId]
@@ -68,7 +68,7 @@ class UampPlaybackPreparer(
      * [MediaSessionCompat.Callback.onPlayFromMediaId], otherwise it's
      * [MediaSessionCompat.Callback.onPrepareFromMediaId].
      */
-    override fun onPrepareFromMediaId(mediaId: String?, extras: Bundle?) {
+    override fun onPrepareFromMediaId(mediaId: String?, playWhenReady: Boolean, extras: Bundle?) {
         musicSource.whenReady {
             val itemToPlay: MediaMetadataCompat? = musicSource.find { item ->
                 item.id == mediaId
@@ -87,6 +87,7 @@ class UampPlaybackPreparer(
                 val initialWindowIndex = metadataList.indexOf(itemToPlay)
 
                 exoPlayer.prepare(mediaSource)
+                exoPlayer.playWhenReady = playWhenReady
                 exoPlayer.seekTo(initialWindowIndex, 0)
             }
         }
@@ -104,7 +105,7 @@ class UampPlaybackPreparer(
      *
      * For details on how search is handled, see [AbstractMusicSource.search].
      */
-    override fun onPrepareFromSearch(query: String?, extras: Bundle?) {
+    override fun onPrepareFromSearch(query: String?, playWhenReady: Boolean, extras: Bundle?) {
         musicSource.whenReady {
             val metadataList = musicSource.search(query ?: "", extras ?: Bundle.EMPTY)
             if (metadataList.isNotEmpty()) {
@@ -114,7 +115,7 @@ class UampPlaybackPreparer(
         }
     }
 
-    override fun onPrepareFromUri(uri: Uri?, extras: Bundle?) = Unit
+    override fun onPrepareFromUri(uri: Uri?, playWhenReady: Boolean, extras: Bundle?) = Unit
 
     override fun onCommand(
         player: Player?,
